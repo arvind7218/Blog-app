@@ -52,7 +52,7 @@ const useStyles = makeStyles(() => ({
     fontSize: "18px",
     color: "#555",
     textAlign: "center",
-    marginTop: "20px",
+    marginTop: "25px",
   },
 }));
 
