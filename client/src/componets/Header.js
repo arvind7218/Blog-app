@@ -1,5 +1,6 @@
-import React, { useReducer } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import { authActions, setDarkmode } from "../store";
 import {
   AppBar,
@@ -9,110 +10,90 @@ import {
   Button,
   Tabs,
   Tab,
+  IconButton,
 } from "@mui/material";
-import { useDispatch, useSelector } from "react-redux";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";
-import { useState } from "react";
 import { lightTheme, darkTheme } from "../utils/theme";
 
 const Header = () => {
-  const dispath = useDispatch();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
   const isDark = useSelector((state) => state.theme.isDarkmode);
-  const theme = isDark ? darkTheme : lightTheme;
-
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const theme = isDark ? darkTheme : lightTheme;
+  const [value, setValue] = useState(null);
 
-  const [value, setValue] = useState();
+  // Set the correct tab based on the route
+  useEffect(() => {
+    if (location.pathname === "/signup") {
+      setValue(1);
+    } else if (location.pathname === "/login") {
+      setValue(0);
+    } else {
+      setValue(null); // No tab active for non-auth pages
+    }
+  }, [location]);
 
   return (
-    <AppBar position="sticky" sx={{ background: `${theme.bg}` }}>
-      <Toolbar>
-        <Typography variant="h4">BlogsApp</Typography>
+    <AppBar position="sticky" sx={{ background: theme.bg, boxShadow: 3 }}>
+      <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+        <Typography variant="h5" fontWeight={600} color="inherit">
+          BlogsApp
+        </Typography>
         {isLoggedIn && (
-          <Box display="flex" marginLeft={"auto"} marginRight="auto">
-            <Tabs
-              textColor="inherit"
-              value={value}
-              onChange={(e, val) => setValue(val)}
-            >
-              <Tab
-                //className={classes.font}
-                LinkComponent={Link}
-                to="/blogs"
-                label="All Blogs"
-              />
-              <Tab
-                //className={classes.font}
-                LinkComponent={Link}
-                to="/myBlogs"
-                label="My Blogs"
-              />
-              <Tab
-                //className={classes.font}
-                LinkComponent={Link}
-                to="/blogs/add"
-                label="Add Blog"
-              />
-            </Tabs>
-          </Box>
+          <Tabs
+            textColor="inherit"
+            value={value}
+            onChange={(e, val) => setValue(val)}
+            indicatorColor="secondary"
+          >
+            <Tab component={Link} to="/blogs" label="All Blogs" />
+            <Tab component={Link} to="/myBlogs" label="My Blogs" />
+            <Tab component={Link} to="/blogs/add" label="Add Blog" />
+          </Tabs>
         )}
-        <Box display="flex" marginLeft="auto">
-          {!isLoggedIn && (
+        <Box display="flex" alignItems="center">
+          {!isLoggedIn ? (
             <>
-              {" "}
               <Button
-                LinkComponent={Link}
-                to="login/"
-                sx={{
-                  margin: 1,
-                  fontWeight: "bold",
-                  color: "white",
-                  borderRadius: 10,
-                }}
+                onClick={() => navigate("/login")}
+                sx={{ mx: 1, fontWeight: "bold", borderRadius: 2 }}
+                color="primary"
+                variant={value === 0 ? "contained" : "outlined"}
               >
                 Login
               </Button>
               <Button
-                LinkComponent={Link}
-                to="login/"
-                sx={{
-                  margin: 1,
-                  fontWeight: "bold",
-                  color: "white",
-                  borderRadius: 10,
-                }}
+                onClick={() => navigate("/signup")}
+                sx={{ mx: 1, fontWeight: "bold", borderRadius: 2 }}
+                color="secondary"
+                variant={value === 1 ? "contained" : "outlined"}
               >
-                SignUp
+                Sign Up
               </Button>
             </>
-          )}
-
-          {isLoggedIn && (
+          ) : (
             <Button
-              onClick={() => dispath(authActions.logout())}
-              LinkComponent={Link}
-              to="/login"
-              variant="contained"
-              sx={{ margin: 1, borderRadius: 10 }}
+              onClick={() => {
+                dispatch(authActions.logout());
+                navigate("/login");
+              }}
+              sx={{ mx: 1, borderRadius: 2 }}
               color="warning"
+              variant="contained"
             >
               Logout
             </Button>
           )}
-          <div
-            onClick={(e) => {
-              e.preventDefault();
-              dispath(setDarkmode(!isDark));
-            }}
-            style={{
-              alignContent: "center",
-              padding: "10px 0",
-              cursor: "pointer",
-            }}
+          <IconButton
+            onClick={() => dispatch(setDarkmode(!isDark))}
+            sx={{ ml: 1 }}
+            color="inherit"
           >
             {isDark ? <LightModeIcon /> : <DarkModeIcon />}
-          </div>
+          </IconButton>
         </Box>
       </Toolbar>
     </AppBar>
