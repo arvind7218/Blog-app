@@ -1,31 +1,39 @@
-import './App.css';
-import { Route, Routes } from "react-router-dom";
-import Header from './componets/Header';
-import React from 'react';
-import Login from './componets/Login';
-import Blogs from './componets/Blogs';
-import UserBlogs from './componets/UserBlogs'
-import AddBlogs from './componets/AddBlogs'
-import BlogDetail from './componets/BlogDetail'
-
-
+import "./App.css";
+import { Route, Routes, Navigate } from "react-router-dom";
+import Header from "./componets/Header"; // Fixed typo
+import React, { useEffect, useState } from "react";
+import Login from "./componets/Login"; // Fixed typo
+import Blogs from "./componets/Blogs";
+import UserBlogs from "./componets/UserBlogs";
+import AddBlogs from "./componets/AddBlogs";
+import BlogDetail from "./componets/BlogDetail";
 
 function App() {
-  return <React.Fragment>
-    <header>
-      <Header/>
-    </header>
-    <main>
-    <Routes>
-      <Route path="/login" element={<Login/>}></Route>
-      <Route path="/blogs" element={<Blogs/>}></Route>
-      <Route path="/myBlogs" element={<UserBlogs/>}></Route>
-      <Route path="/myBlogs/:id" element={<BlogDetail/>}></Route>
-      <Route path="/blogs/add" element={<AddBlogs />} />
-    </Routes>
-    </main>
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  </React.Fragment>;
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsAuthenticated(!!token);
+  }, []);
+
+  return (
+    <React.Fragment>
+      <header>
+        <Header />
+      </header>
+      <main>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Login />} /> {/* ✅ Add Signup Route */}
+          <Route path="/blogs" element={<Blogs />} />
+          <Route path="/myBlogs" element={<UserBlogs />} />
+          <Route path="/myBlogs/:id" element={<BlogDetail />} />
+          <Route path="/blogs/add" element={<AddBlogs />} />
+          <Route path="*" element={<Navigate to="/login" />} />
+        </Routes>
+      </main>
+    </React.Fragment>
+  );
 }
 
 export default App;
